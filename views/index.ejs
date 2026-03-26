@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizza House</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="page page-home">
+        <% if (!isLoggedIn) { %>
+            <div class="info-banner">
+                <strong>Для замовлення піци потрібно зареєструватися або увійти</strong>
+            </div>
+        <% } %>
+
+        <section class="content-box">
+            <h2 class="section-title">Меню</h2>
+
+            <div class="pizza-grid">
+                <% pizzas.forEach(pizza => { %>
+                    <div class="pizza-card">
+                        <img src="/images/<%= pizza.image %>" alt="<%= pizza.name %>">
+                        <h3><%= pizza.name %></h3>
+                        <p class="pizza-description"><%= pizza.description %></p>
+                        <p class="price"><%= pizza.price %> грн</p>
+
+                        <% if (isLoggedIn) { %>
+                            <form action="/cart/add/<%= pizza.id %>" method="POST">
+                                <button type="submit" class="btn btn-main">Додати в кошик</button>
+                            </form>
+                        <% } else { %>
+                            <button type="button" class="btn btn-main" onclick="alert('Для замовлення потрібно увійти або зареєструватися')">
+                                Додати в кошик
+                            </button>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошик - Pizza House</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="page">
+        <section class="content-box cart-box">
+            <h2 class="section-title">Кошик</h2>
+
+            <% if (error) { %>
+                <p class="message error-message"><%= error %></p>
+            <% } %>
+
+            <% if (success) { %>
+                <p class="message success-message">Замовлення успішно оформлено! Дякуємо!</p>
+            <% } %>
+
+            <% if (cart.length === 0) { %>
+                <p class="empty-text">Кошик порожній</p>
+            <% } else { %>
+                <% let total = 0; %>
+
+                <div class="cart-list">
+                    <% cart.forEach(p => { %>
+                        <% total += p.price * (p.quantity || 1); %>
+
+                        <div class="cart-item">
+                            <div class="cart-item-info">
+                                <strong><%= p.name %></strong>
+                                <p><%= p.price %> грн за 1 шт.</p>
+                                <p>Кількість: <%= p.quantity || 1 %></p>
+                                <p>Разом: <%= p.price * (p.quantity || 1) %> грн</p>
+                            </div>
+
+                            <div class="cart-controls">
+                                <form action="/cart/update/<%= p.id %>" method="POST" class="qty-form">
+                                    <input type="hidden" name="action" value="decrease">
+                                    <button type="submit" class="btn btn-qty">−</button>
+                                </form>
+
+                                <span class="qty-value"><%= p.quantity || 1 %></span>
+
+                                <form action="/cart/update/<%= p.id %>" method="POST" class="qty-form">
+                                    <input type="hidden" name="action" value="increase">
+                                    <button type="submit" class="btn btn-qty">+</button>
+                                </form>
+
+                                <form action="/cart/remove/<%= p.id %>" method="POST">
+                                    <button type="submit" class="btn btn-danger">Видалити</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <p class="cart-total">Загальна сума: <%= total %> грн</p>
+
+                <form action="/cart/checkout" method="POST">
+                    <button type="submit" class="btn btn-main cart-checkout-btn">Оформити замовлення</button>
+                </form>
+            <% } %>
+
+            <p class="back-link"><a href="/">Назад до меню</a></p>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

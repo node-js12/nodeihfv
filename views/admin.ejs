@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адмін панель - Pizza House</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main class="page">
+        <section class="content-box admin-box">
+            <h2 class="section-title">Адмін панель</h2>
+
+            <div class="admin-section">
+                <h3>Додати піцу</h3>
+                <form action="/admin/add" method="POST" class="admin-form">
+                    <input name="name" placeholder="Назва піци" required>
+                    <input name="description" placeholder="Опис" required>
+                    <input name="price" placeholder="Ціна" type="number" step="0.01" required>
+                    <button type="submit" class="btn btn-main">Додати</button>
+                </form>
+            </div>
+
+            <div class="admin-section">
+                <h3>Меню (редагування / видалення)</h3>
+
+                <% pizzas.forEach(p => { %>
+                    <div class="admin-card">
+                        <form action="/admin/edit/<%= p.id %>" method="POST" class="admin-form">
+                            <input name="name" value="<%= p.name %>" required>
+                            <input name="description" value="<%= p.description %>" required>
+                            <input name="price" value="<%= p.price %>" type="number" step="0.01" required>
+
+                            <div class="admin-actions">
+                                <button type="submit" class="btn btn-edit">Зберегти зміни</button>
+                            </div>
+                        </form>
+
+                        <form action="/admin/delete/<%= p.id %>" method="POST">
+                            <button type="submit" class="btn btn-danger">Видалити</button>
+                        </form>
+                    </div>
+                <% }) %>
+            </div>
+
+            <div class="admin-section">
+                <h3>Замовлення</h3>
+
+                <% if (orders.length === 0) { %>
+                    <p>Немає замовлень</p>
+                <% } else { %>
+                    <% orders.forEach(o => { %>
+                        <div class="admin-card">
+                            <p><strong>Замовлення № <%= o.id %></strong></p>
+                            <p>Користувач: <%= o.user %></p>
+                            <p>Статус: <%= o.status %></p>
+                            <p>Дата: <%= o.createdAt %></p>
+
+                            <ul class="order-list">
+                                <% o.items.forEach(i => { %>
+                                    <li><%= i.name %> × <%= i.quantity || 1 %> — <%= i.price * (i.quantity || 1) %> грн</li>
+                                <% }) %>
+                            </ul>
+
+                            <% if (o.status !== 'Оброблено') { %>
+                                <form action="/admin/process/<%= o.id %>" method="POST">
+                                    <button type="submit" class="btn btn-success">Обробити</button>
+                                </form>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

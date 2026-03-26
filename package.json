@@ -1,0 +1,24 @@
+{
+  "name": "pizza-house",
+  "version": "1.0.0",
+  "description": "Pizza House Node.js + Express + EJS",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "ejs": "^4.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "moment": "^2.30.1",
+    "msnodesqlv8": "^5.1.5",
+    "mssql": "^12.2.1",
+    "sequelize": "^6.37.8",
+    "tedious": "^19.2.1"
+  }
+}

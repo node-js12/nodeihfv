@@ -1,0 +1,26 @@
+<header class="site-header">
+    <div class="header-inner">
+        <div class="header-left"></div>
+
+        <div class="header-center">
+            <a href="/" class="logo-link">
+                <img src="/images/IMG_1241.PNG" alt="Pizza House" class="logo">
+            </a>
+        </div>
+
+        <nav class="header-nav">
+            <% if (user) { %>
+                <a href="/">Меню</a>
+                <a href="/cart">Кошик</a>
+                <% if (user.role === 'admin') { %>
+                    <a href="/admin">Адмін-панель</a>
+                <% } %>
+                <a href="/logout">Вийти</a>
+            <% } else { %>
+                <a href="/">Меню</a>
+                <a href="/login">Увійти</a>
+                <a href="/register">Реєстрація</a>
+            <% } %>
+        </nav>
+    </div>
+</header>
