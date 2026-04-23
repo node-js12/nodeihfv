@@ -1,12 +1,16 @@
-require("dotenv").config();
+require('dotenv').config();
 const express = require('express');
 const { sequelize } = require('./models');
 const path = require('path');
+const fs = require('fs');
 const session = require('express-session');
 const pizzaRoutes = require('./routes/pizzaRoutes');
 const pizzaApiRoutes = require('./routes/pizzaApiRoutes');
 
 const app = express();
+
+const imagesDir = path.join(__dirname, 'public', 'images');
+fs.mkdirSync(imagesDir, { recursive: true });
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -32,7 +36,7 @@ app.use('/', pizzaRoutes);
 app.use('/api', pizzaApiRoutes);
 
 app.use((req, res) => {
-    res.status(404).send('Сторінка не знайдена 😕');
+    res.status(404).send('Сторінка не знайдена');
 });
 
 sequelize.authenticate()

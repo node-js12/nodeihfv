@@ -12,20 +12,21 @@ async function getPizzaById(id) {
     return await pizzaRepository.getById(id);
 }
 
-async function addPizza({ name, description, price }) {
+async function addPizza({ name, description, price, image }) {
     return await pizzaRepository.add({
         name,
         description,
         price: parseFloat(price),
-        image: 'default.jpg'
+        image: image || 'default.jpg'
     });
 }
 
-async function editPizza(id, { name, description, price }) {
+async function editPizza(id, { name, description, price, image }) {
     return await pizzaRepository.update(id, {
         name,
         description,
-        price: parseFloat(price)
+        price: parseFloat(price),
+        image
     });
 }
 

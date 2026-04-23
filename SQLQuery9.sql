@@ -1,0 +1,1 @@
+EXEC xp_readerrorlog 0, 1, N'Login failed for user ''pizza_user''';

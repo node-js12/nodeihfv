@@ -1,4 +1,3 @@
-const moment = require('moment');
 const { sequelize } = require('../models');
 const orderRepository = require('../repositories/orderRepository');
 const userRepository = require('../repositories/userRepository');
@@ -14,22 +13,30 @@ async function createOrder(username, cart) {
         throw new Error('Користувача не знайдено');
     }
 
-    const transaction = await sequelize.transaction();
+    let transaction = null;
 
     try {
-        const createdAt = moment().toDate();
+        transaction = await sequelize.transaction();
 
         const orderId = await orderRepository.createOrder(
             user.id,
             cart,
-            createdAt,
             transaction
         );
 
         await transaction.commit();
         return orderId;
     } catch (error) {
-        await transaction.rollback();
+        console.error('SPRAVZHNYA POMYLKA CREATE ORDER:', error.message);
+
+        try {
+            if (transaction && !transaction.finished) {
+                await transaction.rollback();
+            }
+        } catch (rollbackError) {
+            console.error('POMYLKA ROLLBACK:', rollbackError.message);
+        }
+
         throw error;
     }
 }

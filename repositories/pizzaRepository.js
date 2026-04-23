@@ -57,53 +57,71 @@ async function getById(id) {
 }
 
 async function add(pizza) {
-    const transaction = await sequelize.transaction();
+    let transaction = null;
 
     try {
+        transaction = await sequelize.transaction();
+
         const created = await Pizza.create({
             name: pizza.name,
             description: pizza.description,
             price: pizza.price,
-            image: pizza.image
+            image: pizza.image || 'default.jpg'
         }, { transaction });
 
         await transaction.commit();
         return created.get({ plain: true });
     } catch (error) {
-        await transaction.rollback();
+        if (transaction && !transaction.finished) {
+            await transaction.rollback();
+        }
         throw error;
     }
 }
 
 async function update(id, updatedFields) {
-    const transaction = await sequelize.transaction();
+    let transaction = null;
 
     try {
+        transaction = await sequelize.transaction();
+
         const pizza = await Pizza.findByPk(id, { transaction });
 
         if (!pizza) {
-            await transaction.rollback();
+            if (transaction && !transaction.finished) {
+                await transaction.rollback();
+            }
             return null;
         }
 
-        await pizza.update({
+        const updateData = {
             name: updatedFields.name,
             description: updatedFields.description,
             price: updatedFields.price
-        }, { transaction });
+        };
+
+        if (updatedFields.image) {
+            updateData.image = updatedFields.image;
+        }
+
+        await pizza.update(updateData, { transaction });
 
         await transaction.commit();
         return pizza.get({ plain: true });
     } catch (error) {
-        await transaction.rollback();
+        if (transaction && !transaction.finished) {
+            await transaction.rollback();
+        }
         throw error;
     }
 }
 
 async function remove(id) {
-    const transaction = await sequelize.transaction();
+    let transaction = null;
 
     try {
+        transaction = await sequelize.transaction();
+
         const deleted = await Pizza.destroy({
             where: { id },
             transaction
@@ -112,7 +130,9 @@ async function remove(id) {
         await transaction.commit();
         return deleted > 0;
     } catch (error) {
-        await transaction.rollback();
+        if (transaction && !transaction.finished) {
+            await transaction.rollback();
+        }
         throw error;
     }
 }

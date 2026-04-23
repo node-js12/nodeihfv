@@ -15,10 +15,11 @@
 
             <div class="admin-section">
                 <h3>Додати піцу</h3>
-                <form action="/admin/add" method="POST" class="admin-form">
+                <form action="/admin/add" method="POST" enctype="multipart/form-data" class="admin-form">
                     <input name="name" placeholder="Назва піци" required>
                     <input name="description" placeholder="Опис" required>
                     <input name="price" placeholder="Ціна" type="number" step="0.01" required>
+                    <input type="file" name="image" accept="image/*">
                     <button type="submit" class="btn btn-main">Додати</button>
                 </form>
             </div>
@@ -28,10 +29,18 @@
 
                 <% pizzas.forEach(p => { %>
                     <div class="admin-card">
-                        <form action="/admin/edit/<%= p.id %>" method="POST" class="admin-form">
+                        <form action="/admin/edit/<%= p.id %>" method="POST" enctype="multipart/form-data" class="admin-form">
                             <input name="name" value="<%= p.name %>" required>
                             <input name="description" value="<%= p.description %>" required>
                             <input name="price" value="<%= p.price %>" type="number" step="0.01" required>
+
+                            <% if (p.image) { %>
+                                <div class="pizza-preview">
+                                    <img src="/images/<%= p.image %>" alt="<%= p.name %>" style="width: 120px; border-radius: 12px; margin: 10px 0;">
+                                </div>
+                            <% } %>
+
+                            <input type="file" name="image" accept="image/*">
 
                             <div class="admin-actions">
                                 <button type="submit" class="btn btn-edit">Зберегти зміни</button>
@@ -48,20 +57,30 @@
             <div class="admin-section">
                 <h3>Замовлення</h3>
 
-                <% if (orders.length === 0) { %>
+                <% if (!orders || orders.length === 0) { %>
                     <p>Немає замовлень</p>
                 <% } else { %>
                     <% orders.forEach(o => { %>
+                        <% const items = o.items || o.OrderItems || []; %>
+
                         <div class="admin-card">
                             <p><strong>Замовлення № <%= o.id %></strong></p>
-                            <p>Користувач: <%= o.user %></p>
+                            <p>Користувач: <%= o.user || o.username || o.userId || 'Невідомо' %></p>
                             <p>Статус: <%= o.status %></p>
                             <p>Дата: <%= o.createdAt %></p>
 
                             <ul class="order-list">
-                                <% o.items.forEach(i => { %>
-                                    <li><%= i.name %> × <%= i.quantity || 1 %> — <%= i.price * (i.quantity || 1) %> грн</li>
-                                <% }) %>
+                                <% if (items.length === 0) { %>
+                                    <li>Позиції замовлення відсутні</li>
+                                <% } else { %>
+                                    <% items.forEach(i => { %>
+                                        <li>
+                                            <%= i.name || (i.Pizza && i.Pizza.name) || 'Піца' %>
+                                            × <%= i.quantity || 1 %>
+                                            — <%= ((i.price || (i.Pizza && i.Pizza.price) || 0) * (i.quantity || 1)) %> грн
+                                        </li>
+                                    <% }) %>
+                                <% } %>
                             </ul>
 
                             <% if (o.status !== 'Оброблено') { %>

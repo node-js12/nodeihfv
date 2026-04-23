@@ -1,79 +1,68 @@
-const { Order, OrderItem, Pizza, User, sequelize } = require('../models');
+const { Order, OrderItem, Pizza, sequelize } = require('../models');
 
 async function getAll() {
-    const orders = await Order.findAll({
+    return await Order.findAll({
         include: [
             {
-                model: User,
-                attributes: ['username']
-            },
-            {
                 model: OrderItem,
-                include: [
-                    {
-                        model: Pizza,
-                        attributes: ['name']
-                    }
-                ]
+                include: [Pizza]
             }
         ],
-        order: [['id', 'DESC']]
+        order: [['createdAt', 'DESC']]
     });
-
-    return orders.map(order => ({
-        id: order.id,
-        userId: order.userId,
-        user: order.User ? order.User.username : '',
-        status: order.status,
-        createdAt: order.createdAt,
-        items: order.OrderItems.map(item => ({
-            id: item.id,
-            orderId: item.orderId,
-            pizzaId: item.pizzaId,
-            quantity: item.quantity,
-            price: item.price,
-            name: item.Pizza ? item.Pizza.name : ''
-        }))
-    }));
 }
 
-async function createOrder(userId, cart, createdAt, transaction) {
-    const order = await Order.create({
-        userId,
-        status: 'Нове',
-        createdAt
-    }, { transaction });
+async function createOrder(userId, cart, transaction) {
+    const order = await Order.create(
+        {
+            userId: userId,
+            status: 'Нове',
+            createdAt: sequelize.literal('GETDATE()')
+        },
+        { transaction }
+    );
 
     for (const item of cart) {
-        await OrderItem.create({
-            orderId: order.id,
-            pizzaId: item.id,
-            quantity: item.quantity || 1,
-            price: item.price
-        }, { transaction });
+        const pizzaId = item.pizzaId || item.id;
+        const quantity = item.quantity || 1;
+
+        let price = item.price;
+
+        if (price == null) {
+            const pizza = await Pizza.findByPk(pizzaId, { transaction });
+
+            if (!pizza) {
+                throw new Error(`Піцу з id=${pizzaId} не знайдено`);
+            }
+
+            price = pizza.price;
+        }
+
+        await OrderItem.create(
+            {
+                orderId: order.id,
+                pizzaId: pizzaId,
+                quantity: quantity,
+                price: price
+            },
+            { transaction }
+        );
     }
 
     return order.id;
 }
 
 async function updateStatus(id, status) {
-    const transaction = await sequelize.transaction();
+    const order = await Order.findByPk(id);
 
-    try {
-        const [updatedRows] = await Order.update(
-            { status },
-            {
-                where: { id },
-                transaction
-            }
-        );
-
-        await transaction.commit();
-        return updatedRows > 0;
-    } catch (error) {
-        await transaction.rollback();
-        throw error;
+    if (!order) {
+        throw new Error('Замовлення не знайдено');
     }
+
+    order.status = status;
+    await order.save();
+
+    return order;
 }
 
 module.exports = {

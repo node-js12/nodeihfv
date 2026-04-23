@@ -160,10 +160,16 @@ exports.addPizza = async (req, res) => {
         return res.redirect('/login');
     }
 
-    const { name, description, price } = req.body;
-    await pizzaService.addPizza({ name, description, price });
+    try {
+        const { name, description, price } = req.body;
+        const image = req.file ? req.file.filename : 'default.jpg';
 
-    res.redirect('/admin');
+        await pizzaService.addPizza({ name, description, price, image });
+        res.redirect('/admin');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Помилка при додаванні піци');
+    }
 };
 
 exports.editPizza = async (req, res) => {
@@ -171,11 +177,17 @@ exports.editPizza = async (req, res) => {
         return res.redirect('/login');
     }
 
-    const id = parseInt(req.params.id);
-    const { name, description, price } = req.body;
+    try {
+        const id = parseInt(req.params.id);
+        const { name, description, price } = req.body;
+        const image = req.file ? req.file.filename : null;
 
-    await pizzaService.editPizza(id, { name, description, price });
-    res.redirect('/admin');
+        await pizzaService.editPizza(id, { name, description, price, image });
+        res.redirect('/admin');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Помилка при редагуванні піци');
+    }
 };
 
 exports.deletePizza = async (req, res) => {

@@ -1,0 +1,43 @@
+CREATE DATABASE PizzaHouseDB;
+GO
+
+USE PizzaHouseDB;
+GO
+
+CREATE TABLE Users (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    username NVARCHAR(100) NOT NULL UNIQUE,
+    email NVARCHAR(150) NULL,
+    password NVARCHAR(100) NOT NULL,
+    role NVARCHAR(20) NOT NULL DEFAULT 'user'
+);
+GO
+
+CREATE TABLE Pizzas (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(150) NOT NULL,
+    description NVARCHAR(500) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    image NVARCHAR(255) NOT NULL
+);
+GO
+
+CREATE TABLE Orders (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    userId INT NOT NULL,
+    status NVARCHAR(50) NOT NULL DEFAULT 'Нове',
+    createdAt DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Orders_Users FOREIGN KEY (userId) REFERENCES Users(id)
+);
+GO
+
+CREATE TABLE OrderItems (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    orderId INT NOT NULL,
+    pizzaId INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    price DECIMAL(10,2) NOT NULL,
+    CONSTRAINT FK_OrderItems_Orders FOREIGN KEY (orderId) REFERENCES Orders(id),
+    CONSTRAINT FK_OrderItems_Pizzas FOREIGN KEY (pizzaId) REFERENCES Pizzas(id)
+);
+GO
